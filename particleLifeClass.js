@@ -2,6 +2,7 @@ var canvas = document.getElementById('myCanvas');
 canvas.width = Math.floor(innerWidth / 80) * 80;
 canvas.height = Math.floor(innerHeight / 80) * 80;
 console.log(canvas.width);
+console.log(canvas.height);
 var c = canvas.getContext('2d');
 
 const n = 1000;
