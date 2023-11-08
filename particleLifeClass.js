@@ -44,12 +44,12 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
             
             var rx = particleArray[i].positionX - this.positionX;
             var ry = particleArray[i].positionY - this.positionY;
-            if (Math.abs(rx) > 0.5) {
-                rx = (1 - Math.abs(rx)) * -rx / Math.abs(rx);
-            }
-            if (Math.abs(ry) > 0.5) {
-                ry = (1 - Math.abs(ry)) * -ry / Math.abs(ry);
-            }
+            // if (Math.abs(rx) > 0.5) {
+            //     rx = (1 - Math.abs(rx)) * -rx / Math.abs(rx);
+            // }
+            // if (Math.abs(ry) > 0.5) {
+            //     ry = (1 - Math.abs(ry)) * -ry / Math.abs(ry);
+            // }
             const r = Math.hypot(rx, ry);
             if (r > 0 && r < rMax) {
                 const f = force(r/ rMax, matrix[this.color][particleArray[i].color]);
@@ -70,10 +70,10 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
     this.updatePosition = function() {
         this.positionX += this.velocityX * dt;
         this.positionY += this.velocityY * dt;
-        if (this.positionX > 1) {this.positionX = 0;}
-        if (this.positionX < 0) {this.positionX = 1;}
-        if (this.positionY > 1) {this.positionY = 0;}
-        if (this.positionY < 0) {this.positionY = 1;}
+        // if (this.positionX > 1) {this.positionX = 0;}
+        // if (this.positionX < 0) {this.positionX = 1;}
+        // if (this.positionY > 1) {this.positionY = 0;}
+        // if (this.positionY < 0) {this.positionY = 1;}
     }
 
     this.draw = function() {
@@ -127,4 +127,4 @@ function loop() {
     requestAnimationFrame(loop);
 
 }
-// requestAnimationFrame(loop);
+requestAnimationFrame(loop);
