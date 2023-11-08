@@ -8,10 +8,10 @@ var c = canvas.getContext('2d');
 const n = 1000;
 const dt = 0.02;
 const frictionHalfLife = 0.040;
-const rMax = 0.1;
+const rMax = 80;
 const m = 6;
 const matrix = makeRandomMatrix();
-const forceFactor = 5;
+const forceFactor = 10;
 
 const frictionFactor = Math.pow(0.5, dt / frictionHalfLife);
 
@@ -44,15 +44,15 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
             
             var rx = particleArray[i].positionX - this.positionX;
             var ry = particleArray[i].positionY - this.positionY;
-            // if (Math.abs(rx) > 0.5) {
-            //     rx = (1 - Math.abs(rx)) * -rx / Math.abs(rx);
-            // }
-            // if (Math.abs(ry) > 0.5) {
-            //     ry = (1 - Math.abs(ry)) * -ry / Math.abs(ry);
-            // }
+            if (Math.abs(rx) > (canvas.width / 2)) {
+                rx = (canvas.width - Math.abs(rx)) * -rx / Math.abs(rx);
+            }
+            if (Math.abs(ry) > (canvas.height / 2)) {
+                ry = (canvas.height - Math.abs(ry)) * -ry / Math.abs(ry);
+            }
             const r = Math.hypot(rx, ry);
             if (r > 0 && r < rMax) {
-                const f = force(r/ rMax, matrix[this.color][particleArray[i].color]);
+                const f = force(r / rMax, matrix[this.color][particleArray[i].color]);
                 totalForceX += rx / r * f;
                 totalForceY += ry / r * f;
             }
@@ -70,25 +70,23 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
     this.updatePosition = function() {
         this.positionX += this.velocityX * dt;
         this.positionY += this.velocityY * dt;
-        // if (this.positionX > 1) {this.positionX = 0;}
-        // if (this.positionX < 0) {this.positionX = 1;}
-        // if (this.positionY > 1) {this.positionY = 0;}
-        // if (this.positionY < 0) {this.positionY = 1;}
+        if (this.positionX > canvas.width) {this.positionX = 0;}
+        if (this.positionX < 0) {this.positionX = canvas.width;}
+        if (this.positionY > canvas.height) {this.positionY = 0;}
+        if (this.positionY < 0) {this.positionY = canvas.height;}
     }
 
     this.draw = function() {
         c.beginPath();
-        const screenX = this.positionX * canvas.width;
-        const screenY = this.positionY * canvas.height;
-        c.arc(screenX, screenY, 2, 0, 2 * Math.PI);
+        c.arc(this.positionX, this.positionY, 2, 0, 2 * Math.PI);
         c.fillStyle = `hsl(${360 * this.color / m}, 100%, 50%)`;
         c.fill();
     }
 }
 var particleArray = [];
 for (let i = 0; i < n; i++) {
-    particleArray.push(new Particle(Math.random(), 
-                                    Math.random(), 
+    particleArray.push(new Particle(Math.random() * canvas.width, 
+                                    Math.random() * canvas.height, 
                                     0, 
                                     0, 
                                     Math.floor(Math.random() * m),
