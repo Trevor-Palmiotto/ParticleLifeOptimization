@@ -1,5 +1,5 @@
 var canvas = document.getElementById('myCanvas');
-const rMax = 30;
+const rMax = 50;
 canvas.width = Math.floor(innerWidth / rMax) * rMax;
 canvas.height = Math.floor(innerHeight / rMax) * rMax;
 console.log(canvas.width);
@@ -8,13 +8,13 @@ var c = canvas.getContext('2d');
 
 const w = canvas.width / rMax;
 const h = canvas.height / rMax;
-const n = 500;
+const n = 1000;
 const dt = 0.02;
 const frictionHalfLife = 0.040;
 const m = 6;
 const matrix = makeRandomMatrix();
 const forceFactor = 10;
-var grid = [];
+var grid = new Map();
 const frictionFactor = Math.pow(0.5, dt / frictionHalfLife);
 
 function makeRandomMatrix() {
@@ -105,14 +105,24 @@ function force(r, a) {
         return 0;
     }
 }
-
+var t = 0;
 function fillGrid() {
-    grid = [];
+    grid.clear();
     for (let i = 0; i < n; i++) {
-
+        let wd = Math.floor(particleArray[i].positionX / rMax);
+        let ht = Math.floor(particleArray[i].positionY / rMax);
+        if (!grid.has(ht * w + wd)){
+            grid.set(ht * w + wd, []);
+            t++;
+        }
+        var arr = grid.get(ht * w + wd);
+        arr.push(i);
+        grid.set(ht * w + wd, arr);
     }
 }
-
+fillGrid();
+console.log(t);
+console.log(grid);
 function loop() {
     
     // clear screen
@@ -130,7 +140,7 @@ function loop() {
     for (let i = 0; i < n; i++) {
         particleArray[i].draw();
     }
-    requestAnimationFrame(loop);
+    // requestAnimationFrame(loop);
 
 }
 requestAnimationFrame(loop);
