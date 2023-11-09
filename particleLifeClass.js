@@ -1,18 +1,20 @@
 var canvas = document.getElementById('myCanvas');
-canvas.width = Math.floor(innerWidth / 80) * 80;
-canvas.height = Math.floor(innerHeight / 80) * 80;
+const rMax = 30;
+canvas.width = Math.floor(innerWidth / rMax) * rMax;
+canvas.height = Math.floor(innerHeight / rMax) * rMax;
 console.log(canvas.width);
 console.log(canvas.height);
 var c = canvas.getContext('2d');
 
-const n = 1000;
+const w = canvas.width / rMax;
+const h = canvas.height / rMax;
+const n = 500;
 const dt = 0.02;
 const frictionHalfLife = 0.040;
-const rMax = 80;
 const m = 6;
 const matrix = makeRandomMatrix();
 const forceFactor = 10;
-
+var grid = [];
 const frictionFactor = Math.pow(0.5, dt / frictionHalfLife);
 
 function makeRandomMatrix() {
@@ -104,6 +106,12 @@ function force(r, a) {
     }
 }
 
+function fillGrid() {
+    grid = [];
+    for (let i = 0; i < n; i++) {
+
+    }
+}
 
 function loop() {
     
