@@ -2,13 +2,13 @@ var canvas = document.getElementById('myCanvas');
 const rMax = 100;
 canvas.width = Math.floor(innerWidth / rMax) * rMax;
 canvas.height = Math.floor(innerHeight / rMax) * rMax;
-console.log(canvas.width);
-console.log(canvas.height);
+// console.log(canvas.width);
+// console.log(canvas.height);
 var c = canvas.getContext('2d');
 
 const w = canvas.width / rMax;
 const h = canvas.height / rMax;
-const n = 2000;
+const n = 3000;
 const dt = 0.02;
 const frictionHalfLife = 0.040;
 const m = 6;
@@ -74,8 +74,7 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
             if (grid.has(NNs[i])) {
                 var pArray = grid.get(NNs[i]);
                 pArray.forEach(p => {
-                    if (p == this.index) return;
-                    confirm
+                    if (p === this.index) return;
                     var rx = particleArray[p].positionX - this.positionX;
                     var ry = particleArray[p].positionY - this.positionY;
 
@@ -86,6 +85,9 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
                         ry = (canvas.height - Math.abs(ry)) * -ry / Math.abs(ry);
                     }
                     const r = Math.hypot(rx, ry);
+                    if (r < 0) {
+                        console.log(r);
+                    }
                     if (r > 0 && r < rMax) {
                         const f = force(r / rMax, matrix[this.color][particleArray[p].color]);
                         totalForceX += rx / r * f;
@@ -138,6 +140,7 @@ function force(r, a) {
         return 0;
     }
 }
+
 function fillGrid() {
     grid.clear();
     for (let i = 0; i < n; i++) {
@@ -151,10 +154,9 @@ function fillGrid() {
         grid.set(ht * w + wd, arr);
     }
 }
-fillGrid();
-console.log(grid);
+// console.log(grid);
 function loop() {
-    
+    fillGrid();
     // clear screen
     c.fillStyle = "black";
     c.fillRect(0, 0, canvas.width, canvas.height);
@@ -172,4 +174,4 @@ function loop() {
     }
     requestAnimationFrame(loop);
 }
-// requestAnimationFrame(loop);
+requestAnimationFrame(loop);
