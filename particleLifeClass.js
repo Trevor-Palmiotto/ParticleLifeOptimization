@@ -29,8 +29,24 @@ function makeRandomMatrix() {
     return rows;
 }
 
-function getNearestNeighbors() {
-    // returns neighboring grids 
+function getNearestNeighbors(ht, wd) {
+    // returns neighboring grids in index format
+    var Hs = [
+        ((ht - 1) + h) % h,
+        ((ht) + h) % h,
+        ((ht + 1) + h) % h
+    ];
+    var Ws = [
+        ((wd - 1) + w) % w,
+        ((wd) + w) % w,
+        ((wd + 1) + w) % w
+    ];
+    var NN = [];
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            
+        }
+    }
 }
 
 window.addEventListener("click", function() {
@@ -51,7 +67,7 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
 
         for (let i = 0; i < n; i++) {
             if (i === this.index) continue;
-            
+
             var rx = particleArray[i].positionX - this.positionX;
             var ry = particleArray[i].positionY - this.positionY;
             if (Math.abs(rx) > (canvas.width / 2)) {
