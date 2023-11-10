@@ -8,7 +8,7 @@ var c = canvas.getContext('2d');
 
 const w = canvas.width / rMax;
 const h = canvas.height / rMax;
-const n = 1000;
+const n = 20;
 const dt = 0.02;
 const frictionHalfLife = 0.040;
 const m = 6;
@@ -29,7 +29,7 @@ function makeRandomMatrix() {
     return rows;
 }
 
-function getNearestNeighbors(ht, wd) {
+function getNearestNeighbors(wd, ht) {
     // returns neighboring grids in index format
     var Hs = [
         ((ht - 1) + h) % h,
@@ -65,24 +65,37 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
     this.updateVelocity = function() {
         let totalForceX = 0;
         let totalForceY = 0;
+        var NNs = getNearestNeighbors(Math.floor(this.positionX / rMax), Math.floor(this.positionY / rMax));
+        // console.log(NNs);
+        // console.log(grid.get(Math.floor(this.positionX / rMax) + Math.floor(this.positionY / rMax) * w));
+        for (let i = 0; i < NNs.length; i++){
+            if (grid.has(NNs[i])) {
+                var pArray = grid.get(NNs[i]);
+                pArray.forEach(p => {
+                    if (p == this.index) return;
+                    console.log(p);
+                });
+            }
 
-        for (let i = 0; i < n; i++) {
-            if (i === this.index) continue;
+            // for (let j = 0; j < rng; j++) {
+            //     console.log()
+                // if (i === this.index) continue;
 
-            var rx = particleArray[i].positionX - this.positionX;
-            var ry = particleArray[i].positionY - this.positionY;
-            if (Math.abs(rx) > (canvas.width / 2)) {
-                rx = (canvas.width - Math.abs(rx)) * -rx / Math.abs(rx);
-            }
-            if (Math.abs(ry) > (canvas.height / 2)) {
-                ry = (canvas.height - Math.abs(ry)) * -ry / Math.abs(ry);
-            }
-            const r = Math.hypot(rx, ry);
-            if (r > 0 && r < rMax) {
-                const f = force(r / rMax, matrix[this.color][particleArray[i].color]);
-                totalForceX += rx / r * f;
-                totalForceY += ry / r * f;
-            }
+                // var rx = particleArray[i].positionX - this.positionX;
+                // var ry = particleArray[i].positionY - this.positionY;
+                // if (Math.abs(rx) > (canvas.width / 2)) {
+                //     rx = (canvas.width - Math.abs(rx)) * -rx / Math.abs(rx);
+                // }
+                // if (Math.abs(ry) > (canvas.height / 2)) {
+                //     ry = (canvas.height - Math.abs(ry)) * -ry / Math.abs(ry);
+                // }
+                // const r = Math.hypot(rx, ry);
+                // if (r > 0 && r < rMax) {
+                //     const f = force(r / rMax, matrix[this.color][particleArray[i].color]);
+                //     totalForceX += rx / r * f;
+                //     totalForceY += ry / r * f;
+                // }
+            // }
         }
         totalForceX *= rMax * forceFactor;
         totalForceY *= rMax * forceFactor;
@@ -128,7 +141,6 @@ function force(r, a) {
         return 0;
     }
 }
-var t = 0;
 function fillGrid() {
     grid.clear();
     for (let i = 0; i < n; i++) {
@@ -136,7 +148,6 @@ function fillGrid() {
         let ht = Math.floor(particleArray[i].positionY / rMax);
         if (!grid.has(ht * w + wd)){
             grid.set(ht * w + wd, []);
-            t++;
         }
         var arr = grid.get(ht * w + wd);
         arr.push(i);
@@ -144,7 +155,6 @@ function fillGrid() {
     }
 }
 fillGrid();
-console.log(t);
 console.log(grid);
 function loop() {
     
