@@ -8,7 +8,7 @@ var c = canvas.getContext('2d');
 
 const w = canvas.width / rMax;
 const h = canvas.height / rMax;
-const n = 1000;
+const n = 2000;
 const dt = 0.02;
 const frictionHalfLife = 0.040;
 const m = 6;
@@ -75,7 +75,7 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
                 var pArray = grid.get(NNs[i]);
                 pArray.forEach(p => {
                     if (p == this.index) return;
-                    
+                    confirm
                     var rx = particleArray[p].positionX - this.positionX;
                     var ry = particleArray[p].positionY - this.positionY;
 
@@ -172,4 +172,4 @@ function loop() {
     }
     requestAnimationFrame(loop);
 }
-requestAnimationFrame(loop);
+// requestAnimationFrame(loop);
