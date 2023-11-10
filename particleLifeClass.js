@@ -1,5 +1,5 @@
 var canvas = document.getElementById('myCanvas');
-const rMax = 50;
+const rMax = 100;
 canvas.width = Math.floor(innerWidth / rMax) * rMax;
 canvas.height = Math.floor(innerHeight / rMax) * rMax;
 console.log(canvas.width);
@@ -27,6 +27,10 @@ function makeRandomMatrix() {
         rows.push(row);
     }
     return rows;
+}
+
+function getNearestNeighbors() {
+    // returns neighboring grids 
 }
 
 function Particle(positionX, positionY, velocityX, velocityY, color, index) {
@@ -72,10 +76,8 @@ function Particle(positionX, positionY, velocityX, velocityY, color, index) {
     this.updatePosition = function() {
         this.positionX += this.velocityX * dt;
         this.positionY += this.velocityY * dt;
-        if (this.positionX > canvas.width) {this.positionX = 0;}
-        if (this.positionX < 0) {this.positionX = canvas.width;}
-        if (this.positionY > canvas.height) {this.positionY = 0;}
-        if (this.positionY < 0) {this.positionY = canvas.height;}
+        this.positionX = (this.positionX + canvas.width) % canvas.width
+        this.positionY = (this.positionY + canvas.height) % canvas.height
     }
 
     this.draw = function() {
@@ -140,7 +142,6 @@ function loop() {
     for (let i = 0; i < n; i++) {
         particleArray[i].draw();
     }
-    // requestAnimationFrame(loop);
-
+    requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
