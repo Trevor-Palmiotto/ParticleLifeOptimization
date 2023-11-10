@@ -12,7 +12,7 @@ const n = 1000;
 const dt = 0.02;
 const frictionHalfLife = 0.040;
 const m = 6;
-const matrix = makeRandomMatrix();
+var matrix = makeRandomMatrix();
 const forceFactor = 10;
 var grid = new Map();
 const frictionFactor = Math.pow(0.5, dt / frictionHalfLife);
@@ -32,6 +32,10 @@ function makeRandomMatrix() {
 function getNearestNeighbors() {
     // returns neighboring grids 
 }
+
+window.addEventListener("click", function() {
+    matrix = makeRandomMatrix();
+})
 
 function Particle(positionX, positionY, velocityX, velocityY, color, index) {
     this.positionX = positionX;
@@ -142,6 +146,6 @@ function loop() {
     for (let i = 0; i < n; i++) {
         particleArray[i].draw();
     }
-    requestAnimationFrame(loop);
+    // requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
