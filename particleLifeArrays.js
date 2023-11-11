@@ -1,4 +1,5 @@
 var canvas = document.getElementById('myCanvas');
+const rMax = 0.4;
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 var c = canvas.getContext('2d');
@@ -6,7 +7,6 @@ var c = canvas.getContext('2d');
 const n = 1000;
 const dt = 0.02;
 const frictionHalfLife = 0.040;
-const rMax = 0.1;
 const m = 6;
 const matrix = makeRandomMatrix();
 const forceFactor = 10;
@@ -25,17 +25,21 @@ function makeRandomMatrix() {
     return rows;
 }
 
-const colors = new Float32Array(n);
+const colors = new Int32Array(n);
 const positionsX = new Float32Array(n);
 const positionsY = new Float32Array(n);
+const positionsZ = new Float32Array(n);
 const velocitiesX = new Float32Array(n);
 const velocitiesY = new Float32Array(n);
+const velocitiesZ = new Float32Array(n);
 for (let i = 0; i < n; i++) {
     colors[i] = Math.floor(Math.random() * m);
-    positionsX[i] = Math.random();
-    positionsY[i] = Math.random();
+    positionsX[i] = Math.random() * 2 - 1;
+    positionsY[i] = Math.random() * 2 - 1;
+    positionsZ[i] = Math.random() * 2 - 1;
     velocitiesX[i] = 0;
     velocitiesY[i] = 0;
+    velocitiesZ[i] = 0;
 }
 
 function force(r, a) {
@@ -54,44 +58,53 @@ function updateParticles() {
     for (let i = 0; i < n; i++) {
         let totalForceX = 0;
         let totalForceY = 0;
+        let totalForceZ = 0;
 
         for (let j = 0; j < n; j++) {
             if (j === i) continue;
             
             var rx = positionsX[j] - positionsX[i];
             var ry = positionsY[j] - positionsY[i];
-            if (Math.abs(rx) > 0.5) {
-                rx = (1 - Math.abs(positionsX[j] - positionsX[i])) * -(positionsX[j] - positionsX[i]) / Math.abs(positionsX[j] - positionsX[i]);
-            }
-            if (Math.abs(ry) > 0.5) {
-                ry = (1 - Math.abs(positionsY[j] - positionsY[i])) * -(positionsY[j] - positionsY[i]) / Math.abs(positionsY[j] - positionsY[i]);
-            }
-            const r = Math.hypot(rx, ry);
+            var rz = positionsZ[j] - positionsZ[i];
+            // if (Math.abs(rx) > 0.5) {
+            //     rx = (1 - Math.abs(rx)) * -rx / Math.abs(rx);
+            // }
+            // if (Math.abs(ry) > 0.5) {
+            //     ry = (1 - Math.abs(ry)) * -ry / Math.abs(ry);
+            // }
+            // if (Math.abs(rz) > 0.5) {
+            //     ry = (1 - Math.abs(rz)) * -(rz) / Math.abs(rz);
+            // }
+            const r = Math.sqrt(rx*rx + ry*ry + rz*rz);
             if (r > 0 && r < rMax) {
                 const f = force(r / rMax, matrix[colors[i]][colors[j]]);
                 totalForceX += rx / r * f;
                 totalForceY += ry / r * f;
+                totalForceZ += rz / r * f;
             }
         }
 
         totalForceX *= rMax * forceFactor;
         totalForceY *= rMax * forceFactor;
+        totalForceZ *= rMax * forceFactor;
     
         velocitiesX[i] *= frictionFactor;
         velocitiesY[i] *= frictionFactor;
+        velocitiesZ[i] *= frictionFactor;
 
         velocitiesX[i] += totalForceX * dt;
         velocitiesY[i] += totalForceY * dt;
+        velocitiesZ[i] += totalForceZ * dt;
     }
 
     //update positions
     for (let i = 0; i < n; i++) {
         positionsX[i] += velocitiesX[i] * dt;
         positionsY[i] += velocitiesY[i] * dt;
-        if (positionsX[i] < 0) positionsX[i] = 1;
-        if (positionsX[i] > 1) positionsX[i] = 0;
-        if (positionsY[i] < 0) positionsY[i] = 1;
-        if (positionsY[i] > 1) positionsY[i] = 0;
+        positionsZ[i] += velocitiesZ[i] * dt;
+        // positionsX[i] = (positionsX[i] + 1) % 1
+        // positionsY[i] = (positionsY[i] + 1) % 1
+        // positionsZ[i] = (positionsZ[i] + 1) % 1
     }
 }
 
@@ -105,8 +118,9 @@ function loop() {
 
     for (let i = 0; i < n; i++) {
         c.beginPath();
-        const screenX = positionsX[i] * canvas.width;        
-        const screenY = positionsY[i] * canvas.height;
+        const f = 1 / (positionsZ[i] + 2)
+        const screenX = (f * positionsX[i] + 1) * 0.5 * canvas.width;        
+        const screenY = (f * positionsY[i] + 1) * 0.5 * canvas.height;
         c.arc(screenX, screenY, 2, 0, 2 * Math.PI);
         c.fillStyle = `hsl(${360 * (colors[i] / m)}, 100%, 50%)`;
         c.fill();
