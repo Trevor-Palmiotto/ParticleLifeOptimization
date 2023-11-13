@@ -1,177 +1,125 @@
 var canvas = document.getElementById('myCanvas');
-const rMax = 100;
+const rMax = 200;
 canvas.width = Math.floor(innerWidth / rMax) * rMax;
 canvas.height = Math.floor(innerHeight / rMax) * rMax;
-// console.log(canvas.width);
-// console.log(canvas.height);
+// console.zog(canvas.width);
+// console.zog(canvas.height);
 var c = canvas.getContext('2d');
 
-const w = canvas.width / rMax;
-const h = canvas.height / rMax;
-const n = 3000;
-const dt = 0.02;
-const frictionHalfLife = 0.040;
-const m = 6;
-var matrix = makeRandomMatrix();
-const forceFactor = 10;
-var grid = new Map();
-const frictionFactor = Math.pow(0.5, dt / frictionHalfLife);
+const d = 1; // represents distance from the viewport of perspective
 
-function makeRandomMatrix() {
-    const rows = [];
-    for (let i = 0; i < m; i++) {
-        const row = [];
-        for (let j = 0; j < m; j++) {
-            row.push(Math.random() * 2 - 1); 
-        }
-        rows.push(row);
+var w = canvas.width;
+var h = canvas.height;
+var l = w;
+
+var numW = w / rMax;
+var numH = h / rMax;
+var numL = Math.min(numH, numW);
+console.log(numW);
+console.log(numH);
+console.log(numL);
+
+
+// This needs to be scaled
+
+const Point = function(x, y, l) {this.x = x; this.y = y; this.z = l / Math.min(h,w) + d};
+
+var boxPoints = [
+    new Point(-w, -h, 0),
+    new Point(w, -h, 0),
+    new Point(w, h, 0),
+    new Point(-w, h, 0),
+    new Point(-w, -h, l),
+    new Point(w, -h, l),
+    new Point(w, h, l),
+    new Point(-w, h, l),
+];
+
+var boxEdges = [
+    [0, 1], [1, 2], [2, 3], [3, 0],
+    [0, 4], [1, 5], [2, 6], [3, 7],
+    [4, 5], [5, 6], [6, 7], [7, 4]
+];
+
+function drawBox() {
+    for (let i = 0; i < boxEdges.length; i++) {
+        c.beginPath();
+        c.moveTo(computeX(boxPoints[boxEdges[i][0]]), computeY(boxPoints[boxEdges[i][0]]));
+        c.lineTo(computeX(boxPoints[boxEdges[i][1]]), computeY(boxPoints[boxEdges[i][1]]));
+        c.strokeStyle = 'red';
+        c.stroke();
     }
-    return rows;
 }
 
-function getNearestNeighbors(wd, ht) {
-    // returns neighboring grids in index format
-    // console.log(wd);
-    // console.log(ht);
-    var Hs = [
-        ((ht - 1) + h) % h,
-        ((ht) + h) % h,
-        ((ht + 1) + h) % h
-    ];
-    var Ws = [
-        ((wd - 1) + w) % w,
-        ((wd) + w) % w,
-        ((wd + 1) + w) % w
-    ];
-    var NN = [];
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            NN.push(Hs[i] * w + Ws[j]);
-        }
-    }
-    return NN;
-}
-
-window.addEventListener("click", function() {
-    matrix = makeRandomMatrix();
-})
-
-function Particle(positionX, positionY, velocityX, velocityY, color, index) {
-    this.positionX = positionX;
-    this.positionY = positionY;
-    this.velocityX = velocityX;
-    this.velocityY = velocityY;
-    this.color = color;
-    this.index = index;
-
-    this.updateVelocity = function() {
-        let totalForceX = 0;
-        let totalForceY = 0;
-        var NNs = getNearestNeighbors(Math.floor(this.positionX / rMax), Math.floor(this.positionY / rMax));
-        // console.log(NNs);
-        // console.log(grid.get(Math.floor(this.positionX / rMax) + Math.floor(this.positionY / rMax) * w));
-        for (let i = 0; i < NNs.length; i++){
-            if (grid.has(NNs[i])) {
-                var pArray = grid.get(NNs[i]);
-                pArray.forEach(p => {
-                    if (p === this.index) return;
-                    var rx = particleArray[p].positionX - this.positionX;
-                    var ry = particleArray[p].positionY - this.positionY;
-
-                    if (Math.abs(rx) > (canvas.width / 2)) {
-                        rx = (canvas.width - Math.abs(rx)) * -rx / Math.abs(rx);
-                    }
-                    if (Math.abs(ry) > (canvas.height / 2)) {
-                        ry = (canvas.height - Math.abs(ry)) * -ry / Math.abs(ry);
-                    }
-                    const r = Math.hypot(rx, ry);
-                    if (r < 0) {
-                        console.log(r);
-                    }
-                    if (r > 0 && r < rMax) {
-                        const f = force(r / rMax, matrix[this.color][particleArray[p].color]);
-                        totalForceX += rx / r * f;
-                        totalForceY += ry / r * f;
-                    }
-                });
+function drawPoints() {
+    for (let i = -numH; i < numH + 1; i++) {
+            c.fillStyle = `hsl(${360 * i / numH}, 100%, 50%)`
+            for (let j = -numW; j < numW + 1; j++) {
+            for (let k = 0; k < 2*numL +1; k++) {
+                var point = new Point(w / numW * i * (w/h), h / numH * j* (h/w), l / numL /2 * k)
+                c.beginPath();
+                c.arc(computeX(point), computeY(point), 2 * (1-(k/2/numL)**2), 0, 2 * Math.PI);
+                c.fill();
             }
         }
-        totalForceX *= rMax * forceFactor;
-        totalForceY *= rMax * forceFactor;
-        
-        this.velocityX *= frictionFactor;
-        this.velocityY *= frictionFactor;
-
-        this.velocityX += totalForceX * dt;
-        this.velocityY += totalForceY * dt;
     }
+}
 
-    this.updatePosition = function() {
-        this.positionX += this.velocityX * dt;
-        this.positionY += this.velocityY * dt;
-        this.positionX = (this.positionX + canvas.width) % canvas.width
-        this.positionY = (this.positionY + canvas.height) % canvas.height
-    }
+function computeX(Point) {
+    return (Point.x * d) / (2 * Point.z) + w / 2;
+}
+function computeY(Point) {
+    return (Point.y * d) / (2 * Point.z) + h / 2;
+}
+c.fillRect(0, 0, w, h);
 
-    this.draw = function() {
+function loop() {
+    c.fillRect(0, 0, w, h);
+    drawBox();
+    for (let i = 0; i < boxPoints.length; i++) {
+        var pt = boxPoints[i];
         c.beginPath();
-        c.arc(this.positionX, this.positionY, 2, 0, 2 * Math.PI);
-        c.fillStyle = `hsl(${360 * this.color / m}, 100%, 50%)`;
+        c.arc(computeX(pt), computeY(pt), 5 * (1.1 / pt.z), 0, 2 * Math.PI);
+        c.fillStyle = 'red';
         c.fill();
     }
 }
-var particleArray = [];
-for (let i = 0; i < n; i++) {
-    particleArray.push(new Particle(Math.random() * canvas.width, 
-                                    Math.random() * canvas.height, 
-                                    0, 
-                                    0, 
-                                    Math.floor(Math.random() * m),
-                                    i));
-}
+loop();
+drawPoints();
 
-function force(r, a) {
-    const beta = 0.3;
-    if (r < beta) {
-        return r / beta - 1;
-    } else if (beta < r && r < 1) {
-        return a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta));
-    } else {
-        return 0;
-    }
-}
+window.addEventListener('resize', function() {
+    canvas.width = Math.floor(this.innerWidth / rMax) * rMax;
+    canvas.height = Math.floor(this.innerHeight / rMax) * rMax;
+    h = canvas.height;
+    w = canvas.width;
+    l = Math.min(h, w);
+    
+    boxPoints = [
+        new Point(-w, -h, 0),
+        new Point(w, -h, 0),
+        new Point(w, h, 0),
+        new Point(-w, h, 0),
+        new Point(-w, -h, l),
+        new Point(w, -h, l),
+        new Point(w, h, l),
+        new Point(-w, h, l),
+    ];
 
-function fillGrid() {
-    grid.clear();
-    for (let i = 0; i < n; i++) {
-        let wd = Math.floor(particleArray[i].positionX / rMax);
-        let ht = Math.floor(particleArray[i].positionY / rMax);
-        if (!grid.has(ht * w + wd)){
-            grid.set(ht * w + wd, []);
-        }
-        var arr = grid.get(ht * w + wd);
-        arr.push(i);
-        grid.set(ht * w + wd, arr);
-    }
-}
-// console.log(grid);
-function loop() {
-    fillGrid();
-    // clear screen
-    c.fillStyle = "black";
-    c.fillRect(0, 0, canvas.width, canvas.height);
-    // update velocity
-    for (let i = 0; i < n; i++) {
-        particleArray[i].updateVelocity();
-    }
-    //update position
-    for (let i = 0; i < n; i++) {
-        particleArray[i].updatePosition();
-    }
-    // draw
-    for (let i = 0; i < n; i++) {
-        particleArray[i].draw();
-    }
-    requestAnimationFrame(loop);
-}
-requestAnimationFrame(loop);
+    boxEdges = [
+        [0, 1], [1, 2], [2, 3], [3, 0],
+        [0, 4], [1, 5], [2, 6], [3, 7],
+        [4, 5], [5, 6], [6, 7], [7, 4]
+    ];
+    loop();
+    numW = w / rMax;
+    numH = h / rMax;
+    numL = Math.min(numH, numW);
+    drawPoints();
+})
+
+// var box [
+//     [1];
+//     , [], [], [],
+//     [], [], [], [],
+//     [], [], [], []
+// ];
