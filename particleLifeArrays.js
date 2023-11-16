@@ -157,7 +157,7 @@ function loop() {
         // const f = 1 / (positionsZ[i] + 1)
         // const screenX = (f * positionsX[i] + 1) * 0.5 * canvas.width;        
         // const screenY = (f * positionsY[i] + 1) * 0.5 * canvas.height;
-        c.arc(screenX, screenY, 3 * (1 - ((positionsZ[i] + 1) * 0.5)), 0, 2 * Math.PI);
+        c.arc(screenX, screenY, 2 * (1 - ((positionsZ[i] + 0.67) * 0.5)), 0, 2 * Math.PI);
         c.fillStyle = `hsl(${360 * (colors[i] / m)}, 100%, 50%)`;
         c.fill();
 

@@ -1,5 +1,5 @@
 var canvas = document.getElementById('myCanvas');
-const rMax = 200;
+const rMax = 400; // Remember for +/- this becomes half
 canvas.width = Math.floor(innerWidth / rMax) * rMax;
 canvas.height = Math.floor(innerHeight / rMax) * rMax;
 var c = canvas.getContext('2d');
@@ -18,14 +18,17 @@ function reDim(){
     canvas.height = Math.floor(innerHeight / rMax) * rMax;
     w = canvas.width;
     h = canvas.height;
-    l = w;
+    l = Math.min(w, h);
     numW = w / rMax;
     numH = h / rMax;
     numL = Math.min(numH, numW);
 
 }
 reDim();
-// This needs to be scaled
+console.log(numW);
+console.log(numH);
+console.log(numL);
+
 
 const Point = function(x, y, l) {this.x = x; this.y = y; this.z = l / Math.min(h,w) + d};
 var boxPoints = [];
@@ -60,31 +63,30 @@ function drawBox() {
         c.stroke();
     }
 }
-
+// Something not working here
 function drawGridBox() {
+    // These need to be separated somehow. Height should not be dependent on width etc. This seems to happen, what's going on?
     c.strokeStyle = 'red';
     c.fillStyle = 'red';    
-    for (let j = -numW; j < numW+1; j++) {
-        for (let i = -numH; i < numH+1; i++) {
-
-        for (let k = 0; k < 2*numL +1; k++) {
-                var pointActual = new Point(w / numW * i * (w/h), h / numH * j* (h/w), l / numL /2 * k)
-                var pointW = new Point(w / numW * (i+1) * (w/h), h / numH * (j)* (h/w), l / numL /2 * (k))
-                var pointH = new Point(w / numW * (i) * (w/h), h / numH * (j+1)* (h/w), l / numL /2 * (k))
-                var pointL = new Point(w / numW * (i) * (w/h), h / numH * (j)* (h/w), l / numL / 2 * (k+1))
-
-                c.lineWidth = 0.25;
+    c.lineWidth = 0.25;
+    for (let j = -numW; j < numW + 1; j++) {
+        for (let i = -numH; i < numH + 1; i++) {
+            for (let k = 0; k < 2 * numL + 1; k++) {
+                var pointActual = new Point(w / numW * j, h / numH * i, l / numL / 2 * k)
+                var pointW = new Point(w / numW * (j+1), h / numH * i, l / numL / 2 * (k))
+                var pointH = new Point(w / numW * j, h / numH * (i+1), l / numL / 2 * (k))
+                var pointL = new Point(w / numW * j, h / numH * i, l / numL / 2 * (k+1))
 
                 c.beginPath();
                 c.arc(computeX(pointActual), computeY(pointActual), 2 * (1-(k/2/numL)**2), 0, 2 * Math.PI);
                 c.fill();
-                if (j-1 < numW && i < numH){
+                if (j < numW && i - 1 < numH){
                     c.beginPath();
                     c.moveTo(computeX(pointActual), computeY(pointActual));
                     c.lineTo(computeX(pointW), computeY(pointW));
                     c.stroke();
                 }
-                if (i -1< numH && j < numW) {
+                if (i < numH && j - 1 < numW) {
                 c.beginPath();
                 c.moveTo(computeX(pointActual), computeY(pointActual));
                 c.lineTo(computeX(pointH), computeY(pointH));
@@ -108,7 +110,6 @@ function computeX(Point) {
 function computeY(Point) {
     return (Point.y * d) / (2 * Point.z) + h / 2;
 }
-c.fillRect(0, 0, w, h);
 
 function draw() {
     c.fillRect(0, 0, w, h);
@@ -122,19 +123,19 @@ function draw() {
     }
 }
 draw();
-
-window.addEventListener('click', function(){
-    if (this.document.getElementById("showGridCheckBox").checked && !boxDrawn){
         drawGridBox();
-        boxDrawn = true;
-    }
-    else if (!this.document.getElementById("showGridCheckBox").checked){
-        c.fillStyle = 'black';
-        draw();
-        boxDrawn = false;
-    }
-})
 
+// window.addEventListener('click', function(){
+//     if (this.document.getElementById("showGridCheckBox").checked && !boxDrawn){
+//         drawGridBox();
+//         boxDrawn = true;
+//     }
+//     else if (!this.document.getElementById("showGridCheckBox").checked){
+//         c.fillStyle = 'black';
+//         draw();
+//         boxDrawn = false;
+//     }
+// })
 window.addEventListener('resize', function() {
     reDim();
     updateBox();
@@ -144,4 +145,3 @@ window.addEventListener('resize', function() {
     numL = Math.min(numH, numW);
     drawGridBox();
 })
-
