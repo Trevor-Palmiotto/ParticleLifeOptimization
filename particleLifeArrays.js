@@ -37,9 +37,6 @@ for (let i = 0; i < n; i++) {
     positionsX[i] = Math.random() * 2 - 1;
     positionsY[i] = Math.random() * 2 - 1;
     positionsZ[i] = Math.random() * 2 - 1;
-    // positionsX[i] = Math.random() - 0.5;
-    // positionsY[i] = Math.random() - 0.5;
-    // positionsZ[i] = Math.random() - 0.5;
     velocitiesX[i] = 0;
     velocitiesY[i] = 0;
     velocitiesZ[i] = 0;
@@ -90,23 +87,14 @@ function updateParticles() {
         totalForceX *= rMax * forceFactor;
         totalForceY *= rMax * forceFactor;
         totalForceZ *= rMax * forceFactor;
-        // totalForceX *= rMax * forceFactor/2;
-        // totalForceY *= rMax * forceFactor/2;
-        // totalForceZ *= rMax * forceFactor/2;
 
         velocitiesX[i] *= frictionFactor;
         velocitiesY[i] *= frictionFactor;
         velocitiesZ[i] *= frictionFactor;
-        // velocitiesX[i] *= frictionFactor / 2;
-        // velocitiesY[i] *= frictionFactor / 2;
-        // velocitiesZ[i] *= frictionFactor / 2;
 
         velocitiesX[i] += totalForceX * dt;
         velocitiesY[i] += totalForceY * dt;
         velocitiesZ[i] += totalForceZ * dt;
-        // velocitiesX[i] += totalForceX * dt/2;
-        // velocitiesY[i] += totalForceY * dt/2;
-        // velocitiesZ[i] += totalForceZ * dt/2;
     }
 
     //update positions
@@ -154,9 +142,6 @@ function loop() {
         const f = 1 / (positionsZ[i] + 2)
         const screenX = (f * positionsX[i] + 1) * 0.5 * canvas.width;        
         const screenY = (f * positionsY[i] + 1) * 0.5 * canvas.height;
-        // const f = 1 / (positionsZ[i] + 1)
-        // const screenX = (f * positionsX[i] + 1) * 0.5 * canvas.width;        
-        // const screenY = (f * positionsY[i] + 1) * 0.5 * canvas.height;
         c.arc(screenX, screenY, 2 * (1 - ((positionsZ[i] + 0.67) * 0.5)), 0, 2 * Math.PI);
         c.fillStyle = `hsl(${360 * (colors[i] / m)}, 100%, 50%)`;
         c.fill();

@@ -10,16 +10,32 @@
                 padding: 0;
             }
             #showGrid{
-                margin: 10px;
+                margin: 1px;
+            }
+            .slider {
+            -webkit-appearance: none;  /* Override default CSS styles */
+            appearance: none;
+            height: 10px;
+            background: #d3d3d3; /* Grey background */
+            outline: none; /* Remove outline */
+            opacity: 1; /* Set transparency (for mouse-over effects on hover) */
+            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+            }
+            .thing {
+                margin-left: 100px;
             }
         </style>
     </head>
     <body>
         <div id="showGrid">
             Show Grid
-            <input type="checkbox" id="showGridCheckBox">
+            <input type="checkbox" id="showLatticeCheckBox">
+            <span class="thing">Grid Slider</span>
+            <input type="range" min = "1" max = "100" value="50" id="slider">
+            <output id="val"></output>
         </div>
         <canvas id="myCanvas"></canvas>
-    <script src="particleLifeClass3D.js"></script>
+    <script src="Draw3D.js"></script>
     </body>
 </html>
