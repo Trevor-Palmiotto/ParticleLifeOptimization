@@ -5,6 +5,7 @@ slider.oninput = function() {
     c.fillStyle = 'black';
     c.fillRect(0,0,w_, h_);
     drawBox();
+    fillPartition(this.value);
     drawLattice(this.value);
 }
 var canvas = document.getElementById('myCanvas');
@@ -15,6 +16,7 @@ canvas.height = Math.floor(innerHeight / rMax) * rMax;
 var c = canvas.getContext('2d');
 var boxDrawn = false; // for Draw Box checkbox
 const d = 1; // unitless distance from the viewport of perspective
+var rubik = []; // as in 3x3x3 cube, holds values for drawing the lattice partitioning
 
 var w_;
 var h_;
@@ -22,6 +24,9 @@ var l_;
 var numW;
 var numH;
 var numL;
+var Ws = [];
+var Hs = [];
+var Ls = [];
 
 // Set dimensions based on the new innerWidth and innerHeight
 function reDim(){
@@ -33,7 +38,7 @@ function reDim(){
     // Lattice dimensions
     numW = w_ / rMax;
     numH = h_ / rMax;
-    numL = Math.min(numH, numW);
+    numL = l_ / rMax;
 }
 reDim();
 console.log(numW);
@@ -53,25 +58,32 @@ function fillPartition(n) {
     // console.log(length);
     // console.log(height);
     // console.log(width);
-    let Ls = [
+    Ls = [
         ((length - 1) + numL) % numL, 
         ((length) + numL) % numL,
         ((length + 1) + numL) % numL
     ];
-    let Hs = [
+    Hs = [
         ((height - 1) + numH) % numH,
         ((height) + numH) % numH,
         ((height + 1) + numH) % numH
     ];
-    let Ws = [
+    Ws = [
         ((width - 1) + numW) % numW,
         ((width) + numW) % numW,
         ((width + 1) + numW) % numW
     ];
-    // console.log(Ls);
-    // console.log(Hs);
-    // console.log(Ws);
+    rubik = [];
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            for (let k = 0; k < 3; k++) {
+                rubik.push(Ls[i] * numH * numW + Hs[j] * numW + Ws[k])
+            }
+        }
+    }
 }
+
+// probably doable in a loop
 function cubeTop(p, length) {
     let pt = Object.create(p);
     // drawing top face
@@ -158,33 +170,30 @@ function cubeFront(p) {
     c.fill();
 }
 function drawCube(n) {
+
+    // dimensions
     let length = Math.floor(n / (numW * numH));
     let height = Math.floor((n % (numW * numH)) / numW);
     let width = n % numW;
+
+    // optimize this bit, it works but isn't perfect
     let pt = new Point(width*rMax, height*rMax, length*rMax);
-    if (width < (numW - 1) / 2) {
-        cubeLeft(pt, length);
-        if (height < (numH - 1) / 2) {
-            cubeBottom(pt, length);
-        } else {
-            cubeTop(pt, length);
-        }
-        cubeRight(pt, length);
-        cubeFront(pt);
-    } else if (width == (numW - 1) / 2) {
-        cubeBottom(pt, length);
-        cubeTop(pt, length);
-        cubeFront(pt);
-    } else {
-        cubeRight(pt, length);
-        if (height < (numH - 1) / 2) {
-            cubeBottom(pt, length);
-        } else {
-            cubeTop(pt, length);
-        }
-        cubeLeft(pt, length);
-        cubeFront(pt);
-    }
+    
+    // drawing top
+    if (height > (numH - 1) / 2 && !Hs.includes(height-1)) {cubeTop(pt, length);}
+
+    // drawing bottom
+    if (height < (numH - 1) / 2 && !Hs.includes(height+1)) {cubeBottom(pt, length);}
+    
+    // drawing left
+    if (width > (numW - 1) / 2 && !Ws.includes(width-1)) {cubeLeft(pt, length);}
+    
+    // drawing right
+    if (width < (numW - 1) / 2 && !Ws.includes(width+1)) {cubeRight(pt, length);}
+    
+    // drawing front
+    cubeFront(pt);
+
 }
 
 // point class
@@ -228,10 +237,9 @@ function drawLattice(n) {
     for (let k = numL; k > -1; k--) {
         for (let i = numH; i > -1; i--) {
             for (let j = numW; j > -1; j--) {
-                var pointActual = new Point(w_ / numW * j, h_ / numH * i, l_ / numL * k)
-                var pointW_minus = new Point(w_ / numW * (j-1), h_ / numH * i, l_ / numL * k)
-                var pointW = new Point(w_ / numW * (j+1), h_ / numH * i, l_ / numL * k)
-                var pointH = new Point(w_ / numW * j, h_ / numH * (i+1), l_ / numL * k)
+                var pointActual = new Point(w_ / numW * j, h_ / numH * i, l_ / numL * (k))
+                var pointW = new Point(w_ / numW * (j+1), h_ / numH * i, l_ / numL * (k))
+                var pointH = new Point(w_ / numW * j, h_ / numH * (i+1), l_ / numL * (k))
                 var pointL = new Point(w_ / numW * j, h_ / numH * i, l_ / numL * (k+1))
                 c.strokeStyle = 'red';
                 c.fillStyle = 'red';   
@@ -242,8 +250,8 @@ function drawLattice(n) {
                     c.lineTo(computeX(pointL), computeY(pointL));
                     c.stroke();
                 }
-                if (j + i * numW + k * numW * numH == n) {
-                    drawCube(n);
+                if (rubik.includes(j + i * numW + k * numW * numH)) {
+                    drawCube(j + i * numW + k * numW * numH);
                 }
                 c.strokeStyle = 'red';
                 c.fillStyle = 'red';    
@@ -261,7 +269,6 @@ function drawLattice(n) {
                     c.lineTo(computeX(pointH), computeY(pointH));
                     c.stroke();
                 }
-                // draw extruding lines
 
 
 
